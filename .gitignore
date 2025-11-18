@@ -1,0 +1,15 @@
+# Root ignores
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Backend dependencies and env
+backend/node_modules/
+backend/.env
+backend/.cache/
+
+# Editor/OS files
+.vscode/
+.idea/
+*.swp

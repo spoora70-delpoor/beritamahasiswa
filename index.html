@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>beritamahasiswa - Berita Terpercaya & Terupdate</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="header-top">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo-section">
+                        <h1>📰 beritamahasiswa</h1>
+                        <div id="tanggal-waktu" class="tanggal-waktu"></div>
+                    </div>
+                    <button id="darkmode-toggle" class="darkmode-toggle" title="Toggle Dark Mode">
+                        <span class="dark-icon">🌙</span>
+                        <span class="light-icon">☀️</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <nav class="main-nav">
+            <div class="container">
+                <ul>
+                    <li><a href="#" data-kategori="all" class="kategori-link active">🏠 Home</a></li>
+                    <li><a href="#" data-kategori="nasional" class="kategori-link">🇮🇩 Nasional</a></li>
+                    <li><a href="#" data-kategori="internasional" class="kategori-link">🌍 Internasional</a></li>
+                    <li><a href="#" data-kategori="olahraga" class="kategori-link">⚽ Olahraga</a></li>
+                    <li><a href="#" data-kategori="teknologi" class="kategori-link">💻 Teknologi</a></li>
+                    <li><a href="#" data-kategori="hiburan" class="kategori-link">🎬 Hiburan</a></li>
+                    <li><a href="#" data-kategori="ekonomi" class="kategori-link">💰 Ekonomi</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container main-container">
+        <main>
+            <section class="search-section">
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" placeholder="🔍 Cari berita, topik, atau kata kunci..." />
+                    <button id="search-btn" class="search-btn">Cari</button>
+                </div>
+            </section>
+
+            <section class="live-update">
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span>Live Update</span>
+                </div>
+                <div id="update-time">Update terakhir: <span id="last-update"></span></div>
+                <div id="notif-update" class="notif-update" style="display:none;">
+                    <span>✨ Ada berita baru!</span>
+                    <button id="refresh-btn" class="refresh-btn">Refresh</button>
+                </div>
+            </section>
+
+            <section class="headline">
+                <div class="section-header">
+                    <h2>📌 Berita Utama Hari Ini</h2>
+                </div>
+                <article class="headline-article">
+                    <div class="headline-image-wrapper">
+                        <img id="headline-img" src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800" alt="Berita Utama">
+                        <div class="headline-badge">HOT</div>
+                    </div>
+                    <div class="headline-content">
+                        <div class="headline-meta">
+                            <span id="headline-kategori" class="kategori-badge"></span>
+                            <span id="headline-date" class="date-badge"></span>
+                        </div>
+                        <h3 id="headline-title">Memuat berita utama...</h3>
+                        <p id="headline-summary">Memuat ringkasan berita...</p>
+                        <a href="#" id="headline-detail" class="read-more-btn">Baca Selengkapnya →</a>
+                    </div>
+                </article>
+            </section>
+
+            <section class="news-list">
+                <div class="section-header">
+                    <h2>📰 Berita Terbaru</h2>
+                    <div class="loading-spinner" id="loading-spinner" style="display:none;"></div>
+                </div>
+                <div id="news-count" class="news-count"></div>
+                <div class="news-grid" id="news-grid">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+                <div id="no-results" class="no-results" style="display:none;">
+                    <p>😔 Tidak ada berita yang ditemukan</p>
+                </div>
+            </section>
+        </main>
+
+        <aside class="sidebar">
+            <div class="sidebar-widget">
+                <h2>🔥 Berita Populer</h2>
+                <ul id="populer-list" class="populer-list">
+                    <li class="skeleton-item"></li>
+                    <li class="skeleton-item"></li>
+                    <li class="skeleton-item"></li>
+                </ul>
+            </div>
+            <div class="sidebar-widget">
+                <h2>📊 Kategori</h2>
+                <div class="kategori-stats" id="kategori-stats">
+                    <!-- Stats akan dimuat dinamis -->
+                </div>
+            </div>
+            <div class="sidebar-widget">
+                <h2>📅 Trending Hari Ini</h2>
+                <div id="trending-list" class="trending-list">
+                    <!-- Trending akan dimuat dinamis -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>beritamahasiswa</h3>
+                    <p>Menyajikan berita terkini, terpercaya, dan terupdate dari berbagai kategori</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Kategori</h3>
+                    <ul>
+                        <li><a href="#" data-kategori="nasional">Nasional</a></li>
+                        <li><a href="#" data-kategori="internasional">Internasional</a></li>
+                        <li><a href="#" data-kategori="olahraga">Olahraga</a></li>
+                        <li><a href="#" data-kategori="teknologi">Teknologi</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Ikuti Kami</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Twitter</a>
+                        <a href="#" class="social-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 beritamahasiswa — by riyan perdhana putra.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="modal-detail" class="modal-detail">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header">
+                <div class="modal-meta">
+                    <span id="modal-kategori" class="kategori-badge"></span>
+                    <span id="modal-date" class="date-badge"></span>
+                </div>
+                <h2 id="modal-title"></h2>
+            </div>
+            <div class="modal-image-wrapper">
+                <img id="modal-img" src="" alt="" />
+            </div>
+            <div class="modal-body">
+                <p id="modal-summary" class="modal-summary"></p>
+                <div id="modal-content-text"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="share-btn" id="share-btn">📤 Bagikan</button>
+                <a class="read-more-btn" id="source-btn" target="_blank" rel="noopener noreferrer" style="display:none;">🔗 Buka Sumber</a>
+            </div>
+        </div>
+    </div>
+
+    <button id="scroll-top" class="scroll-top" title="Kembali ke atas">↑</button>
+
+    <!-- Popup Iklan -->
+    <div id="ad-popup" class="ad-popup">
+        <div class="ad-popup-content">
+            <button class="ad-close" id="ad-close">&times;</button>
+            <div class="ad-header">
+                <span class="ad-badge">✨ Spesial</span>
+                <h3 id="ad-title">Penawaran Spesial Hari Ini!</h3>
+            </div>
+            <div class="ad-body">
+                <img id="ad-image" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400" alt="Iklan" />
+                <p id="ad-description">Dapatkan penawaran terbaik untuk Anda hari ini!</p>
+                <a href="#" id="ad-link" class="ad-button" target="_blank">Lihat Penawaran</a>
+            </div>
+            <div class="ad-footer">
+                <label class="ad-dont-show">
+                    <input type="checkbox" id="dont-show-ads" />
+                    <span>Jangan tampilkan lagi hari ini</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Ad Banner -->
+    <div id="floating-ad" class="floating-ad">
+        <button class="floating-ad-close" id="floating-ad-close">&times;</button>
+        <div class="floating-ad-content">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=200" alt="Banner" />
+            <div class="floating-ad-text">
+                <strong>Promo Spesial!</strong>
+                <span>Diskon hingga 50%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Realtime Indicator -->
+    <div id="realtime-indicator" class="realtime-indicator">
+        <span class="realtime-dot"></span>
+        <span>Menyinkronkan berita terbaru...</span>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
