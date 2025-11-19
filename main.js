@@ -1,5 +1,8 @@
 // main.js - Portal Berita Terkini
-const API_URL = 'http://localhost:3000/api';
+// Gunakan API lokal saat pengembangan, dan relatif '/api' saat produksi
+const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000/api'
+  : '/api';
 
 // Utility Functions
 function formatDate(dateString) {
