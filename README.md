@@ -1,5 +1,31 @@
 # 📰 Portal Berita Terkini
 
+Struktur proyek telah dipisahkan antara frontend dan backend agar rapi dan mudah dikembangkan.
+
+## Struktur Proyek
+- `backend/` — API server Express (port `3000`)
+- `frontend/` — Aset UI (HTML, CSS, JS)
+
+## Menjalankan Backend
+- Buka terminal di folder `backend`
+- Jalankan:
+  - `npm install`
+  - `npm start`
+- Cek kesehatan API: `http://localhost:3000/api/health`
+
+## Menjalankan Frontend (Dev)
+- Buka terminal di folder `frontend`
+- Jalankan server statis (pilih salah satu):
+  - `npx serve -s -l 5173` (disarankan)
+  - atau buka langsung `index.html` di browser (untuk uji cepat)
+- Akses UI: `http://localhost:5173/`
+
+Frontend akan melakukan fetch ke API backend di `http://localhost:3000/api` (sudah diaktifkan CORS di backend).
+
+## Catatan
+- Pastikan backend berjalan sebelum membuka frontend agar data berita dapat dimuat.
+- Untuk pengembangan cepat, gunakan `npm run dev` di backend (dengan `nodemon`).
+
 Website berita modern dan lengkap dengan desain menarik, fitur lengkap, dan responsif untuk semua perangkat.
 
 ## ✨ Fitur Utama

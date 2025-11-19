@@ -1,8 +1,5 @@
 // main.js - Portal Berita Terkini
-// Gunakan API lokal saat pengembangan, dan relatif '/api' saat produksi
-const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-  ? 'http://localhost:3000/api'
-  : '/api';
+const API_URL = 'http://localhost:3000/api';
 
 // Utility Functions
 function formatDate(dateString) {
@@ -119,47 +116,21 @@ async function loadBerita(kategori = 'all', search = '') {
             beritaList.forEach(berita => {
                 const article = document.createElement('article');
                 article.innerHTML = `
-                    <img class="news-img" src="${berita.img || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400'}" alt="${berita.title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400'">
+                    <img src="${berita.img || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400'}" alt="${berita.title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400'">
                     <div>
                         <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                             <span class="kategori-badge">${berita.kategori || 'Berita'}</span>
                             <span class="date-badge">${formatDate(berita.date || new Date().toISOString())}</span>
                         </div>
-                        <h3 class="news-title">${berita.title}</h3>
+                        <h3>${berita.title}</h3>
                         <p>${berita.summary}</p>
                         <a href="#" class="detail-link">Baca Selengkapnya →</a>
                     </div>
                 `;
-                // Jadikan seluruh kartu dapat diklik dan aksesibel
-                article.classList.add('news-card');
-                article.setAttribute('role', 'button');
-                article.setAttribute('tabindex', '0');
-                article.setAttribute('aria-label', `Buka detail: ${berita.title}`);
-
-                article.onclick = () => showModal(berita);
-                article.onkeydown = (ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                        ev.preventDefault();
-                        showModal(berita);
-                    }
-                };
-
-                // Tautan detail tetap berfungsi dan tidak menggandakan event
-                const detailLink = article.querySelector('.detail-link');
-                detailLink.onclick = (e) => {
+                article.querySelector('.detail-link').onclick = (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
                     showModal(berita);
                 };
-
-                // Klik gambar dan judul tetap membuka modal
-                const imgEl = article.querySelector('.news-img');
-                const titleEl = article.querySelector('.news-title');
-                imgEl.style.cursor = 'pointer';
-                titleEl.style.cursor = 'pointer';
-                imgEl.onclick = (e) => { e.stopPropagation(); showModal(berita); };
-                titleEl.onclick = (e) => { e.stopPropagation(); showModal(berita); };
-
                 grid.appendChild(article);
             });
         }
@@ -334,21 +305,7 @@ function showModal(berita) {
     document.getElementById('modal-summary').textContent = berita.summary;
     document.getElementById('modal-kategori').textContent = berita.kategori || 'Berita';
     document.getElementById('modal-date').textContent = formatDate(berita.date || new Date().toISOString());
-    const contentEl = document.getElementById('modal-content-text');
-    const htmlContent = berita.body || berita.summary || '';
-    contentEl.innerHTML = sanitizeHTML(htmlContent);
-    // Source button
-    const sourceBtn = document.getElementById('source-btn');
-    if (berita.link) {
-        sourceBtn.style.display = 'inline-block';
-        sourceBtn.onclick = (e) => {
-            e.preventDefault();
-            window.open(berita.link, '_blank', 'noopener');
-        };
-    } else {
-        sourceBtn.style.display = 'none';
-        sourceBtn.onclick = null;
-    }
+    document.getElementById('modal-content-text').textContent = berita.body || berita.summary;
     document.getElementById('modal-detail').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -629,17 +586,4 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
-}
-// Simple sanitizer to prevent script injection while allowing basic markup
-function sanitizeHTML(html) {
-    if (!html) return '';
-    let safe = String(html);
-    // Remove script/style tags
-    safe = safe.replace(/<\/(?:script|style)>/gi, '')
-               .replace(/<(?:script|style)[^>]*>/gi, '');
-    // Remove on* attributes
-    safe = safe.replace(/ on[a-z]+="[^"]*"/gi, '')
-               .replace(/ on[a-z]+='[^']*'/gi, '')
-               .replace(/ on[a-z]+=\s*[^\s>]+/gi, '');
-    return safe;
 }

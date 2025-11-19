@@ -1,59 +1,11 @@
 // backend/server.js
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-const RSSParser = require('rss-parser');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const rssParser = new RSSParser();
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
-
-// ====== Aggregator Sumber Berita (RSS) ======
-// Catatan: Menggunakan RSS feed publik. Beberapa sumber bisa gagal; sistem akan mengabaikan error.
-function googleNewsFeed(domain) {
-    return `https://news.google.com/rss/search?q=site:${domain}&hl=id&gl=ID&ceid=ID:id`;
-}
-
-const feedSources = [
-    // Agregat umum
-    { name: 'Google News - Indonesia', url: 'https://news.google.com/rss?hl=id&gl=ID&ceid=ID:id', kategori: 'nasional' },
-
-    // Portal Indonesia via Google News search
-    { name: 'Detik', url: googleNewsFeed('detik.com'), kategori: 'nasional' },
-    { name: 'Kompas', url: googleNewsFeed('kompas.com'), kategori: 'nasional' },
-    { name: 'Tribunnews', url: googleNewsFeed('tribunnews.com'), kategori: 'nasional' },
-    { name: 'Okezone', url: googleNewsFeed('okezone.com'), kategori: 'nasional' },
-    { name: 'Liputan6', url: googleNewsFeed('liputan6.com'), kategori: 'nasional' },
-    { name: 'Suara', url: googleNewsFeed('suara.com'), kategori: 'nasional' },
-    { name: 'Kumparan', url: googleNewsFeed('kumparan.com'), kategori: 'nasional' },
-    { name: 'Tempo', url: googleNewsFeed('tempo.co'), kategori: 'nasional' },
-    { name: 'SINDOnews', url: googleNewsFeed('sindonews.com'), kategori: 'nasional' },
-    { name: 'Viva', url: googleNewsFeed('viva.co.id'), kategori: 'nasional' },
-    { name: 'CNN Indonesia', url: googleNewsFeed('cnnindonesia.com'), kategori: 'nasional' },
-    { name: 'TV One News', url: googleNewsFeed('tvonenews.com'), kategori: 'nasional' },
-    { name: 'Republika', url: googleNewsFeed('republika.co.id'), kategori: 'nasional' },
-    { name: 'Medcom', url: googleNewsFeed('medcom.id'), kategori: 'nasional' },
-    { name: 'BeritaSatu', url: googleNewsFeed('beritasatu.com'), kategori: 'nasional' },
-    { name: 'Pikiran Rakyat', url: googleNewsFeed('pikiran-rakyat.com'), kategori: 'nasional' },
-    { name: 'The Jakarta Post', url: googleNewsFeed('thejakartapost.com'), kategori: 'internasional' },
-    { name: 'Bisnis', url: googleNewsFeed('bisnis.com'), kategori: 'ekonomi' },
-    { name: 'Kontan', url: googleNewsFeed('kontan.co.id'), kategori: 'ekonomi' },
-    { name: 'IDN Times', url: googleNewsFeed('idntimes.com'), kategori: 'nasional' },
-    { name: 'Grid', url: googleNewsFeed('grid.id'), kategori: 'nasional' },
-    { name: 'Merdeka', url: googleNewsFeed('merdeka.com'), kategori: 'nasional' },
-    { name: 'Alinea', url: googleNewsFeed('alinea.id'), kategori: 'nasional' },
-    { name: 'Katadata', url: googleNewsFeed('katadata.co.id'), kategori: 'ekonomi' },
-
-    // Referensi luar
-    { name: 'BBC World', url: 'https://feeds.bbci.co.uk/news/world/rss.xml', kategori: 'internasional' }
-];
-
-// Menyimpan link yang sudah diambil agar tidak duplikat
-const knownLinks = new Set();
 
 // Database berita (dalam produksi, gunakan database sesungguhnya)
 const beritaList = [
@@ -191,109 +143,6 @@ const beritaList = [
     }
 ];
 
-// Tandai link yang sudah ada jika ada properti link (untuk masa depan)
-beritaList.forEach(b => { if (b.link) knownLinks.add(b.link); });
-
-// Util: ambil url gambar dari konten HTML jika tersedia
-function extractImageUrlFromContent(html) {
-    if (!html || typeof html !== 'string') return null;
-    const imgMatch = html.match(/https?:\/\/[^\"'\s>]+\.(png|jpg|jpeg|gif)/i);
-    return imgMatch ? imgMatch[0] : null;
-}
-
-function resolveUrl(base, relative) {
-    try {
-        return new URL(relative, base).toString();
-    } catch {
-        return relative;
-    }
-}
-
-// Ambil gambar dari halaman sumber: og:image, twitter:image, atau img pertama
-async function fetchImageFromPage(pageUrl) {
-    try {
-        const res = await axios.get(pageUrl, {
-            timeout: 8000,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.90 Safari/537.36'
-            }
-        });
-        const $ = cheerio.load(res.data);
-        const og = $('meta[property="og:image"]').attr('content') || $('meta[name="og:image"]').attr('content');
-        const tw = $('meta[name="twitter:image"]').attr('content') || $('meta[property="twitter:image"]').attr('content');
-        let img = og || tw;
-        if (!img) {
-            const firstImg = $('img').first().attr('src');
-            if (firstImg) img = resolveUrl(pageUrl, firstImg);
-        }
-        if (img && !/^https?:\/\//.test(img)) {
-            img = resolveUrl(pageUrl, img);
-        }
-        return img || null;
-    } catch (e) {
-        return null;
-    }
-}
-
-// Agregasi feed: ambil dari berbagai sumber dan gabungkan
-async function fetchFeeds() {
-    let newItemsCount = 0;
-    let pageFetches = 0;
-    for (const source of feedSources) {
-        try {
-            const feed = await rssParser.parseURL(source.url);
-            for (const item of feed.items || []) {
-                const link = item.link || item.guid;
-                if (!link || knownLinks.has(link)) continue;
-
-                let img = (item.enclosure && item.enclosure.url) || extractImageUrlFromContent(item.content || item['content:encoded']);
-                const date = item.isoDate || item.pubDate || new Date().toISOString();
-                const summary = item.contentSnippet || (item.content || '').replace(/<[^>]+>/g, '').slice(0, 200);
-
-                // Jika tidak ada gambar di feed, coba ambil dari halaman sumber (batasi agar ringan)
-                if (!img && pageFetches < 10 && link) {
-                    const fetchedImg = await fetchImageFromPage(link);
-                    if (fetchedImg) img = fetchedImg;
-                    pageFetches++;
-                }
-                // Fallback placeholder jika tetap tidak ada
-                img = img || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800';
-
-                const newBerita = {
-                    id: beritaList.length + 1,
-                    img,
-                    title: item.title || 'Berita',
-                    summary: summary || 'Baca selengkapnya di sumber terkait.',
-                    body: (item.content || item['content:encoded'] || summary || ''),
-                    kategori: source.kategori || 'lainnya',
-                    date,
-                    populer: false,
-                    views: 0,
-                    link,
-                    source: source.name
-                };
-
-                beritaList.unshift(newBerita);
-                knownLinks.add(link);
-                newItemsCount++;
-
-                // Batasi jumlah item baru per siklus agar ringan
-                if (newItemsCount >= 30) break;
-            }
-        } catch (err) {
-            // Lewati sumber yang gagal
-            console.error(`Gagal mengambil feed dari ${source.name}:`, err.message || err);
-        }
-    }
-
-    if (newItemsCount > 0) {
-        lastUpdateTime = new Date().toISOString();
-        // Jaga ukuran list agar tidak membengkak (mis. simpan 1000 terbaru)
-        if (beritaList.length > 1000) beritaList.length = 1000;
-        console.log(`🔄 Update: ${newItemsCount} item baru ditambahkan.`);
-    }
-}
-
 // Routes
 app.get('/api/berita', (req, res) => {
     const { kategori, search } = req.query;
@@ -375,13 +224,11 @@ app.get('/api/stats', (req, res) => {
 // Latest Update Endpoint untuk Realtime
 let lastUpdateTime = new Date().toISOString();
 
-// Polling aggregator: ambil berita baru setiap 60 detik
+// Simulasi update berita secara berkala (untuk demo)
 setInterval(() => {
-    fetchFeeds().catch(() => {});
-}, 60000);
-
-// Ambil feed awal saat server start
-fetchFeeds().catch(() => {});
+    // Update waktu terakhir setiap 30 detik (simulasi)
+    lastUpdateTime = new Date().toISOString();
+}, 30000);
 
 app.get('/api/latest-update', (req, res) => {
     res.json({ 
@@ -408,10 +255,6 @@ app.post('/api/berita', (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
-
-// ====== Serving Static Frontend ======
-// Menyajikan index.html dan aset dari root project
-app.use(express.static(path.join(__dirname, '..')));
 
 app.listen(PORT, () => {
     console.log(`🚀 Server berjalan di http://localhost:${PORT}`);

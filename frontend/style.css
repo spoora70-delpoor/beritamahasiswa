@@ -443,8 +443,8 @@ body.darkmode .darkmode-toggle .light-icon {
 
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
 }
 
 .news-grid article {
@@ -455,17 +455,11 @@ body.darkmode .darkmode-toggle .light-icon {
     transition: var(--transition);
     cursor: pointer;
     border: 1px solid var(--border-color);
-    outline: none;
 }
 
 .news-grid article:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
-}
-
-.news-grid article:focus-visible {
-    box-shadow: var(--shadow-lg), 0 0 0 3px rgba(37, 99, 235, 0.35);
-    transform: translateY(-2px);
 }
 
 .news-grid article img {
@@ -491,10 +485,6 @@ body.darkmode .darkmode-toggle .light-icon {
     line-height: 1.4;
 }
 
-.news-grid article h3:hover {
-    color: var(--primary-color);
-}
-
 .news-grid article p {
     color: var(--text-light);
     font-size: 0.95rem;
@@ -514,12 +504,6 @@ body.darkmode .darkmode-toggle .light-icon {
 
 .news-grid article .detail-link:hover {
     gap: 10px;
-}
-
-.news-grid article .detail-link:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
-    border-radius: 6px;
 }
 
 /* Skeleton Loading */
